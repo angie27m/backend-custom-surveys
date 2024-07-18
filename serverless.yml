@@ -1,0 +1,191 @@
+service: acsendo-api-surveys
+
+provider:
+  name: aws
+  stage: ${opt:stage, 'dev'}
+  runtime: java8
+  role: arn:aws:iam::407466444708:role/service-role/javaLambdaRole
+  memorySize: 3008
+  timeout: 120
+  environment:
+    STAGE:  ${opt:stage, 'dev'}
+    ENABLEEMAIL:  ${opt:enableemail, 'false'}
+  vpc: 
+    securityGroupIds:
+      - sg-14995470      
+    subnetIds:
+      - subnet-0b3efecfb7714d955
+      - subnet-0ca845e25b7571f01
+
+package:
+  artifact: target/acsendo-api-survey-0.0.1-SNAPSHOT-lambda-package.zip 
+                
+functions:  
+  surveyadmin:
+    handler: com.acsendo.api.aws.handler.StreamLambdaHandler::handleRequest
+    layers: 
+      - arn:aws:lambda:us-east-1:407466444708:layer:AcsendoApiLibrary:20
+    events: 
+      - http:
+          path: /survey/list
+          method: get
+          cors: true 
+      - http:
+          path: /survey/listSecureCode/{surveyId}
+          method: get
+          cors: true 
+      - http:
+          path: /survey/list/owner/{surveyowner}
+          method: get
+          cors: true 
+      - http:
+          path: /survey/partaker/{employeeId}/list
+          method: get
+          cors: true
+      - http:
+          path: /survey/boss/{bossId}/list
+          method: get
+          cors: true  
+      - http:
+          path: /survey/list/{surveyId}
+          method: get
+          cors: true
+      - http:
+          path: /survey/templates
+          method: get
+          cors: true
+      - http:
+          path: /survey/templatesBase/list
+          method: get
+          cors: true
+      - http:
+          path: /survey/questionsMenu/list
+          method: get
+          cors: true
+      - http:
+          path: /survey/questionBase/{questionCode}
+          method: get
+          cors: true
+      - http:
+          path: /survey/{surveyId}/settings/save
+          method: put
+          cors: true
+      - http:
+          path: /survey/{surveyId}/partakers/save
+          method: post
+          cors: true
+      - http:
+          path: /survey/{surveyId}/partakers/{partakerId}/delete
+          method: delete
+          cors: true
+      - http:
+          path: /survey/save
+          method: put
+          request:
+            parameters:
+              querystrings:
+                url: true
+          cors: true
+      - http:
+          path: /survey/{surveyId}/clone
+          method: get
+          cors: true
+      - http:
+          path: /survey/{surveyId}/delete
+          method: delete
+          cors: true
+      - http:
+          path: /survey/question/save
+          method: put
+          cors: true 
+      - http:
+          path: /survey/question/{questionId}/clone
+          method: post
+          cors: true
+      - http:
+          path: /survey/question/{questionId}/delete
+          method: delete
+          cors: true 
+      - http:
+          path: /survey/{surveyId}/questions
+          method: get
+          cors: true 
+      - http:
+          path: /survey/{surveyId}/startSurvey
+          method: get
+          cors: true 
+      - http:
+          path: /survey/{surveyId}/responses/save/list
+          method: post
+          cors: true 
+      - http:
+          path: /survey/question/{questionId}
+          method: get
+          cors: true     
+      - http:
+          path: /survey/list/owner/page/{surveyOwner}
+          method: get
+          cors: true     
+      - http:
+          path: /survey/boss/page/{bossId}/list
+          method: get
+          cors: true     
+      - http:
+          path: /survey/partaker/page/{employeeId}/list
+          method: get
+          cors: true
+      - http:
+          path: /survey/results/{surveyId}/generalResults
+          method: get
+          cors: true
+      - http:
+          path: /survey/question/list/{surveyId}
+          method: get
+          cors: true
+      - http:
+          path: /survey/responseOptions/list/{surveyId}
+          method: get
+          cors: true
+      - http:
+          path: /survey/results/{surveyId}/resultsByQuestions
+          method: get
+          cors: true
+      - http:
+          path: /survey/results/{surveyId}/resultsDetails
+          method: get
+          cors: true  
+      - http:
+          path: /survey/{surveyId}/partakers/list
+          method: get
+          cors: true
+      - http:
+          path: /survey/{surveyId}/close
+          method: delete
+          cors: true
+      - http:
+          path: /survey/{surveyId}/partakers/list/page
+          method: get
+          cors: true
+      - http:
+          path: /survey/{surveyId}/responses/delete/list
+          method: delete
+          cors: true
+      - http:
+          path: /survey/{surveyId}/startSurvey/{partakerId}
+          method: get
+          cors: true
+      - http:
+          path: /survey/results/{surveyId}/extraFieldsEmployee
+          method: post
+          cors: true
+      - http:
+          path: /survey/configurationModule/{companyId}
+          method: get
+          cors: true
+      - http:
+          path: /survey/configurationModule/{companyId}
+          method: post
+          cors: true
+      - schedule:
+          name: coldStartPreventEventSurvey${opt:stage, 'dev'}
+          rate: rate(5 minutes) 
